@@ -12,12 +12,6 @@ package binarytree;
 import java.lang.StringBuilder;
 
 public class BinaryTree{
-	private class ChildCreateException extends RuntimeException{
-		public ChildCreateException(String msg){
-			super(msg);
-		}
-	}
-
 	private Node root;
 
 	private class Node{
@@ -32,25 +26,45 @@ public class BinaryTree{
 		}
 
 		public void addChild(Node node){
-			if(node.value <= this.value)
+			if(node.value <= this.value){
 				createLeftChild(node);
-			else
+			}
+			else{
 				createRightChild(node);
+			}
 			node.parent = this;
 		}
 
-		private void createLeftChild(Node node){
-			if(this.leftChild != null){
-				throw new ChildCreateException("Left child already exists");
+		public void removeChild(Node node){
+			if(this.leftChild == node){
+				this.leftChild = null;
+			} else if(this.rightChild == node){
+				this.rightChild = null;
 			}
+		}
+
+		public boolean haveChildren(){
+			return this.leftChild != null || this.rightChild != null;
+		}
+
+		public boolean hasBothChildren(){
+			return this.leftChild != null && this.rightChild != null;
+		}
+
+		public boolean hasParent(){
+			return this.parent != null;
+		}
+
+		private void createLeftChild(Node node){
 			this.leftChild = node;
 		}
 
 		private void createRightChild(Node node){
-			if(this.rightChild != null){
-				throw new ChildCreateException("Right child already exists");
-			}
 			this.rightChild = node;
+		}
+
+		public Node successor(){
+			return null;
 		}
 
 		public String toString(){
@@ -89,7 +103,21 @@ public class BinaryTree{
 
 	/* if there are multiple nodes with the same value, deletes the left most */
 	public void delete(int value){
+		Node n = search(value);
+		if(n == null){
+			return;
+		}
 
+		if(!n.haveChildren()){
+			n.parent.removeChild(n);
+			return;
+		}
+
+		Node s = n.successor();
+		replace(n, s);
+	}
+
+	private void replace(Node n, Node s){
 	}
 
 	/* if there are multiple nodes with the same value, returns the left most */
