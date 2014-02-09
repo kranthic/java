@@ -10,6 +10,10 @@ package binarytree;
  */ 
 
 import java.lang.StringBuilder;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
+
 
 public class BinaryTree{
 	private Node root;
@@ -26,6 +30,9 @@ public class BinaryTree{
 		}
 
 		public void addChild(Node node){
+			if(node == null || node == this){
+				return;
+			}
 			if(node.value <= this.value){
 				createLeftChild(node);
 			}
@@ -63,8 +70,29 @@ public class BinaryTree{
 			this.rightChild = node;
 		}
 
+		/*
+		 * If no children, returns nothing, if has only one child returns it else returns the largest in the left subtree
+		 */
 		public Node successor(){
-			return null;
+			if(!this.haveChildren()){
+				return null;
+			}
+			if(this.leftChild == null){
+				return this.rightChild;
+			}
+			if(this.rightChild == null){
+				return this.leftChild;
+			}
+
+			return largest(this.leftChild);
+		}
+
+		private Node largest(Node node){
+			if(node.rightChild == null){
+				return node;
+			}
+
+			return largest(node.rightChild);
 		}
 
 		public String toString(){
@@ -107,17 +135,28 @@ public class BinaryTree{
 		if(n == null){
 			return;
 		}
-
-		if(!n.haveChildren()){
-			n.parent.removeChild(n);
+		
+		Node s = n.successor();
+		System.out.println(s);
+		if(s == null){
+			if(n.hasParent())
+				n.parent.removeChild(n);
 			return;
 		}
 
-		Node s = n.successor();
 		replace(n, s);
 	}
 
 	private void replace(Node n, Node s){
+		//successor node will have atmost 1 child - its left child
+		if(s.haveChildren()){
+			s.parent.addChild(s.leftChild);
+		}
+
+		n.parent.addChild(s);
+		n.parent = null;
+		s.addChild(n.leftChild);
+		s.addChild(n.rightChild);
 	}
 
 	/* if there are multiple nodes with the same value, returns the left most */
@@ -178,12 +217,27 @@ public class BinaryTree{
 	}
 
 	public static void main(String[] args){
-		BinaryTree bt = new BinaryTree();
-		bt.insert(2);
-		bt.insert(2);
-		bt.insert(3);
-		bt.dump();
+		BufferedReader r = new BufferedReader(new InputStreamReader(System.in));
+		
+		try{
+			String command = r.readLine();
+			BinaryTree bt = new BinaryTree();
+			while(command.trim().length() != 0){
+				String[] tokens = command.split(" ");
+				if(tokens[0].equalsIgnoreCase("ins")){
+					bt.insert(Integer.parseInt(tokens[1]));
+				} else if(tokens[0].equalsIgnoreCase("search")){
+					System.out.println(bt.search(Integer.parseInt(tokens[1])));
+				} else if(tokens[0].equalsIgnoreCase("dump")){
+					bt.dump();
+				} else if(tokens[0].equalsIgnoreCase("del")){
+					bt.delete(Integer.parseInt(tokens[1]));
+				}
 
-		System.out.println(bt.search(2).toString());
+				command = r.readLine();
+			}
+		} catch(IOException e){
+			e.printStackTrace();
+		}
 	}
 }
